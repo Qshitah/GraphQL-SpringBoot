@@ -1,16 +1,48 @@
 type Query {
     authors: [AuthorDTO]
+    authorById(id: ID!):AuthorDTO
+    authorsByName(name:String!):[AuthorDTO]
+
     books: [BookDTO]
+    bookById(id: ID!): BookDTO
+    booksByTitle(title: String!): [BookDTO]
+
+    categories: [CategoryDTO]
+    categoryById: CategoryDTO
+    categoriesByName: [CategoryDTO]
+    categoryByName: CategoryDTO
+
 }
 
 type Mutation {
-    addBook(book: BookInput): BookDTO
+    addBook(bookInput: BookInput!): BookDTO
+    updateBook(id: ID!, bookInput:BookInput!): BookDTO
+    deleteBook(id: ID!): Boolean!
+
+    addAuthor(authorInput:AuthorInput!): AuthorDTO
+    updateAuthor(id:ID!,authorInput:AuthorInput!): AuthorDTO
+    deleteAuthor(id:ID!): Boolean
+
+    addCategory(categoryInput:CategoryInput!): CategoryDTO
+    updateCategory(id:ID!,categoryInput:CategoryInput!): CategoryDTO
+    deleteCategory(id:ID!): Boolean
 }
 
 input BookInput {
     title: String!
-    genre: String
     authorIds: [ID!]!
+    price: Float
+    stock: Int
+    publisherName: String
+    categoryIds: [ID!]
+}
+
+input AuthorInput{
+    name:String!
+}
+
+input CategoryInput{
+    name:String!
 }
 
 type AuthorDTO {
@@ -22,6 +54,18 @@ type AuthorDTO {
 type BookDTO {
     id: ID!
     title: String!
-    genre: String
+    price: Float
+    stock: Int
+    publisherName: String
     authorNames: [String]
+    categoryNames: [String]
+    createdAt: String,
+    updatedAt: String
+}
+
+
+type CategoryDTO {
+    id: ID!
+    name: String!
+    books: [BookDTO]
 }

@@ -8,68 +8,73 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 import web.crea.book.graphql.dto.AuthorDTO;
 import web.crea.book.graphql.dto.BookDTO;
+import web.crea.book.graphql.dto.CategoryDTO;
 import web.crea.book.graphql.entity.Author;
 import web.crea.book.graphql.entity.Book;
 import web.crea.book.graphql.entity.Category;
-import web.crea.book.graphql.repository.AuthorRepository;
-import web.crea.book.graphql.service.AuthorService;
-import web.crea.book.graphql.service.BookService;
+import web.crea.book.graphql.service.CategoryService;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
 @AllArgsConstructor
-public class AuthorController {
-
-    private final AuthorService authorService;
+public class CategoryController {
+    private final CategoryService categoryService;
 
     @QueryMapping
-    public List<AuthorDTO> authors() {
-        return authorService.fetchAllAuthors()
+    public List<CategoryDTO> categories() {
+        return categoryService.fetchAllCategories()
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    @QueryMapping
+    public CategoryDTO categoryById(@Argument Long id){
+        Category category = categoryService.fetchById(id);
+        return mapToDTO(category);
+    }
+
+
+
+    @QueryMapping
+    public List<CategoryDTO> categoriesByName(@Argument String name){
+        return categoryService.searchByName(name)
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @QueryMapping
-    public AuthorDTO authorById(@Argument Long id){
-        Author author = authorService.fetchById(id);
-        return mapToDTO(author);
-    }
-
-    @QueryMapping
-    public List<AuthorDTO> authorsByName(@Argument String name){
-        return authorService.searchByName(name)
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+    public CategoryDTO categoryByName(@Argument String name){
+        return mapToDTO(categoryService.fetchByName(name));
     }
 
     @MutationMapping
-    public AuthorDTO addAuthor(@Argument AuthorInput authorInput){
-        Author author = new Author(null,authorInput.name);
-        return mapToDTO(authorService.saveAuthor(author));
+    public CategoryDTO addCategory(@Argument CategoryInput categoryInput){
+        Category category = new Category(null,categoryInput.name);
+        return mapToDTO(categoryService.saveCategory(category));
     }
 
     @MutationMapping
-    public AuthorDTO updateAuthor(@Argument Long id, @Argument AuthorInput authorInput){
-        Author author = new Author(id,authorInput.name);
-        return mapToDTO(authorService.updateAuthor(author));
+    public CategoryDTO updateCategory(@Argument Long id, @Argument CategoryInput categoryInput){
+        Category category = new Category(id,categoryInput.name);
+        return mapToDTO(categoryService.updateCategory(category));
     }
 
     @MutationMapping
-    public Boolean deleteAuthor(@Argument Long id){
-        return authorService.deleteAuthor(id);
+    public Boolean deleteCategory(@Argument Long id){
+        return categoryService.deleteCategory(id);
     }
 
-
-    private AuthorDTO mapToDTO(Author author) {
-        List<BookDTO> books = author.getBooks()
+    private CategoryDTO mapToDTO(Category category) {
+        List<BookDTO> books = category.getBooks()
                 .stream()
                 .map(this::mapBookToDTO)
                 .collect(Collectors.toList());
-        return new AuthorDTO(author.getId(), author.getName(), books);
+        return new CategoryDTO(category.getId(), category.getName(), books);
     }
 
     private BookDTO mapBookToDTO(Book book) {
@@ -95,5 +100,6 @@ public class AuthorController {
         );
     }
 
-    public record AuthorInput(@NotEmpty String name){}
+    public record CategoryInput(@NotEmpty String name){}
+
 }
